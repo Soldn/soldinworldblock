@@ -17,7 +17,7 @@ public class PortalAndTeleportListener implements Listener {
         this.plugin = plugin;
     }
 
-    private void blockAccess(Player player, String world) {
+    private void blockAccess(Player player) {
         Location spawn = Bukkit.getWorld("world").getSpawnLocation();
         player.teleport(spawn);
         player.sendMessage(ChatColor.RED + plugin.getConfig().getString("messages.blocked_access"));
@@ -26,29 +26,25 @@ public class PortalAndTeleportListener implements Listener {
     @EventHandler
     public void onPortal(PlayerPortalEvent event) {
         if (event.getTo() == null) return;
-        Player player = event.getPlayer();
-        String world = event.getTo().getWorld().getName();
-        if (plugin.getWorldBlockManager().isBlocked(world)) {
+        if (plugin.getWorldBlockManager().isBlocked(event.getTo().getWorld().getName())) {
             event.setCancelled(true);
-            blockAccess(player, world);
+            blockAccess(event.getPlayer());
         }
     }
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) {
         if (event.getTo() == null) return;
-        String world = event.getTo().getWorld().getName();
-        if (plugin.getWorldBlockManager().isBlocked(world)) {
+        if (plugin.getWorldBlockManager().isBlocked(event.getTo().getWorld().getName())) {
             event.setCancelled(true);
-            blockAccess(event.getPlayer(), world);
+            blockAccess(event.getPlayer());
         }
     }
 
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
-        String world = event.getPlayer().getWorld().getName();
-        if (plugin.getWorldBlockManager().isBlocked(world)) {
-            blockAccess(event.getPlayer(), world);
+        if (plugin.getWorldBlockManager().isBlocked(event.getPlayer().getWorld().getName())) {
+            blockAccess(event.getPlayer());
         }
     }
 
