@@ -3,6 +3,7 @@ package com.soldinworldblock.managers;
 import com.soldinworldblock.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,42 +28,48 @@ public class WorldBlockManager {
 
     public void blockWorld(String world, long duration) {
         blockedWorlds.put(world, System.currentTimeMillis() + duration);
-        String msg = plugin.getConfig().getString("messages.block.start").replace("{world}", world).replace("{time}", formatDuration(duration));
-        Bukkit.broadcastMessage(ChatColor.RED + msg);
-        startCountdown(world, duration);
+        sendBroadcastMessage("messages.block.start", world, duration);
+        startCountdown(world);
     }
 
     public void unblockWorld(String world) {
         blockedWorlds.remove(world);
-        String msg = plugin.getConfig().getString("messages.unblock").replace("{world}", world);
-        Bukkit.broadcastMessage(ChatColor.GREEN + msg);
+        sendBroadcastMessage("messages.unblock", world, 0);
     }
 
     public Map<String, Long> getBlockedWorlds() {
         return blockedWorlds;
     }
 
-    private void startCountdown(String world, long duration) {
+    private void sendBroadcastMessage(String path, String world, long duration) {
+        String msg = plugin.getConfig().getString(path);
+        if (msg != null) {
+            msg = msg.replace("{world}", world).replace("{time}", formatDuration(duration));
+            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', msg));
+        }
+    }
+
+    private void startCountdown(String world) {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (!isBlocked(world)) return;
 
             long remaining = (blockedWorlds.get(world) - System.currentTimeMillis()) / 1000;
-            Map<String, Object> countdown = plugin.getConfig().getConfigurationSection("messages.block.countdown").getValues(false);
-
-            for (String key : countdown.keySet()) {
-                if (remaining == Integer.parseInt(key)) {
-                    String msg = countdown.get(key).toString().replace("{world}", world);
+            for (String key : plugin.getConfig().getConfigurationSection("messages.block.countdown").getKeys(false)) {
+                int sec = Integer.parseInt(key);
+                if (remaining == sec) {
+                    String msg = plugin.getConfig().getString("messages.block.countdown." + key);
+                    msg = msg.replace("{world}", world);
                     Bukkit.broadcastMessage(ChatColor.YELLOW + msg);
                 }
             }
 
             if (remaining <= 0) {
                 unblockWorld(world);
-                String openedMsg = plugin.getConfig().getString("messages.block.opened").replace("{world}", world);
+                String openedMsg = plugin.getConfig().getString("messages.block.opened");
+                openedMsg = openedMsg.replace("{world}", world);
                 Bukkit.broadcastMessage(ChatColor.GREEN + openedMsg);
             }
-
-        }, 20L, 20L); // проверка каждую секунду
+        }, 20L, 20L);
     }
 
     private String formatDuration(long millis) {
