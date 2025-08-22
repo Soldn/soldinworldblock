@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class PortalListener implements Listener {
 
@@ -21,7 +22,16 @@ public class PortalListener implements Listener {
         String targetWorld = event.getTo().getWorld().getName();
         if (plugin.getWorldBlockManager().isBlocked(targetWorld)) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.RED + "Мир еще не открыт!");
+            player.sendMessage(ChatColor.RED + plugin.getConfig().getString("messages.blocked_portal"));
+        }
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        String targetWorld = event.getTo().getWorld().getName();
+        if (plugin.getWorldBlockManager().isBlocked(targetWorld)) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(ChatColor.RED + plugin.getConfig().getString("messages.blocked_portal"));
         }
     }
 }
