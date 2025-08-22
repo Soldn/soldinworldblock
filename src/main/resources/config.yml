@@ -1,3 +1,23 @@
-# Разработчик: Soldi_n
+# Разработчик: Soldi_n .jar 
 # Плагин: SoldinWorldBlock
-# Версия: 1.0
+# Версия: 1.1
+
+worlds:
+  nether:
+    enabled: true
+    display: "Ад"
+  end:
+    enabled: true
+    display: "Эндер"
+
+messages:
+  block:
+    start: "Мир {world} закрыт на {time}!"
+    countdown:
+      3600: "Мир {world} будет открыт через 1 час!"
+      1800: "Мир {world} будет открыт через 30 минут!"
+      60: "Мир {world} будет открыт через 1 минуту!"
+      10: "Мир {world} будет открыт через 10 секунд!"
+    opened: "Мир {world} открыт!"
+  unblock: "Мир {world} теперь открыт!"
+  blocked_portal: "Мир еще не открыт!"
