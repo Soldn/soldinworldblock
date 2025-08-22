@@ -2,7 +2,6 @@ package com.soldinworldblock.commands;
 
 import com.soldinworldblock.Main;
 import com.soldinworldblock.managers.WorldBlockManager;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.util.StringUtil;
@@ -21,7 +20,6 @@ public class SoldinWorldBlockCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         WorldBlockManager manager = plugin.getWorldBlockManager();
-
         if (args.length == 0) {
             sender.sendMessage(ChatColor.YELLOW + "Использование: /soldinworldblock <block|unblock|status|reload>");
             return true;
