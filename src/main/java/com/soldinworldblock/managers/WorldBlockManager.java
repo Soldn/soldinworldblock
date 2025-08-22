@@ -28,20 +28,20 @@ public class WorldBlockManager {
 
     public void blockWorld(String world, long duration) {
         blockedWorlds.put(world, System.currentTimeMillis() + duration);
-        sendBroadcastMessage("messages.block.start", world, duration);
+        sendBroadcast("messages.block.start", world, duration);
         startCountdown(world);
     }
 
     public void unblockWorld(String world) {
         blockedWorlds.remove(world);
-        sendBroadcastMessage("messages.unblock", world, 0);
+        sendBroadcast("messages.unblock", world, 0);
     }
 
     public Map<String, Long> getBlockedWorlds() {
         return blockedWorlds;
     }
 
-    private void sendBroadcastMessage(String path, String world, long duration) {
+    private void sendBroadcast(String path, String world, long duration) {
         String msg = plugin.getConfig().getString(path);
         if (msg != null) {
             msg = msg.replace("{world}", world).replace("{time}", formatDuration(duration));
@@ -54,19 +54,17 @@ public class WorldBlockManager {
             if (!isBlocked(world)) return;
 
             long remaining = (blockedWorlds.get(world) - System.currentTimeMillis()) / 1000;
-            for (String key : plugin.getConfig().getConfigurationSection("messages.block.countdown").getKeys(false)) {
+            plugin.getConfig().getConfigurationSection("messages.block.countdown").getKeys(false).forEach(key -> {
                 int sec = Integer.parseInt(key);
                 if (remaining == sec) {
-                    String msg = plugin.getConfig().getString("messages.block.countdown." + key);
-                    msg = msg.replace("{world}", world);
+                    String msg = plugin.getConfig().getString("messages.block.countdown." + key).replace("{world}", world);
                     Bukkit.broadcastMessage(ChatColor.YELLOW + msg);
                 }
-            }
+            });
 
             if (remaining <= 0) {
                 unblockWorld(world);
-                String openedMsg = plugin.getConfig().getString("messages.block.opened");
-                openedMsg = openedMsg.replace("{world}", world);
+                String openedMsg = plugin.getConfig().getString("messages.block.opened").replace("{world}", world);
                 Bukkit.broadcastMessage(ChatColor.GREEN + openedMsg);
             }
         }, 20L, 20L);
