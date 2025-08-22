@@ -2,12 +2,15 @@ package com.soldinworldblock.commands;
 
 import com.soldinworldblock.Main;
 import com.soldinworldblock.managers.WorldBlockManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import org.bukkit.command.*;
+import org.bukkit.util.StringUtil;
 
-public class SoldinWorldBlockCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class SoldinWorldBlockCommand implements CommandExecutor, TabCompleter {
 
     private final Main plugin;
 
@@ -17,47 +20,66 @@ public class SoldinWorldBlockCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        WorldBlockManager manager = plugin.getWorldBlockManager();
+
         if (args.length == 0) {
             sender.sendMessage(ChatColor.YELLOW + "Использование: /soldinworldblock <block|unblock|status|reload>");
             return true;
         }
 
-        WorldBlockManager manager = plugin.getWorldBlockManager();
-
-        if (args[0].equalsIgnoreCase("block")) {
-            if (args.length < 3) {
-                sender.sendMessage(ChatColor.RED + "Используйте: /soldinworldblock block <world> <time>");
+        switch (args[0].toLowerCase()) {
+            case "block":
+                if (args.length < 3) {
+                    sender.sendMessage(ChatColor.RED + "Используйте: /soldinworldblock block <мир> <время>");
+                    return true;
+                }
+                String world = args[1];
+                if (!plugin.getConfig().getConfigurationSection("worlds").contains(world)) {
+                    sender.sendMessage(ChatColor.RED + "Неверный мир!");
+                    return true;
+                }
+                long duration = parseTime(args[2]);
+                manager.blockWorld(world, duration);
                 return true;
-            }
-            String world = args[1];
-            String time = args[2];
-            manager.blockWorld(world, time);
-            sender.sendMessage(ChatColor.GREEN + "Мир " + world + " закрыт на " + time);
-            return true;
-        }
 
-        if (args[0].equalsIgnoreCase("unblock")) {
-            if (args.length < 2) {
-                sender.sendMessage(ChatColor.RED + "Используйте: /soldinworldblock unblock <world>");
+            case "unblock":
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Используйте: /soldinworldblock unblock <мир>");
+                    return true;
+                }
+                manager.unblockWorld(args[1]);
                 return true;
-            }
-            String world = args[1];
-            manager.unblockWorld(world);
-            sender.sendMessage(ChatColor.GREEN + "Мир " + world + " открыт.");
-            return true;
-        }
 
-        if (args[0].equalsIgnoreCase("status")) {
-            sender.sendMessage(manager.getStatus());
-            return true;
-        }
+            case "status":
+                sender.sendMessage(manager.getBlockedWorlds().toString());
+                return true;
 
-        if (args[0].equalsIgnoreCase("reload")) {
-            plugin.reloadConfig();
-            sender.sendMessage(ChatColor.GREEN + "Конфиг перезагружен.");
-            return true;
-        }
+            case "reload":
+                plugin.reloadConfig();
+                sender.sendMessage(ChatColor.GREEN + "Конфиг перезагружен.");
+                return true;
 
-        return false;
+            default:
+                sender.sendMessage(ChatColor.RED + "Неизвестная команда!");
+                return true;
+        }
+    }
+
+    private long parseTime(String time) {
+        long multiplier = 1000;
+        if (time.endsWith("h")) return Long.parseLong(time.replace("h", "")) * 3600 * multiplier;
+        if (time.endsWith("d")) return Long.parseLong(time.replace("d", "")) * 86400 * multiplier;
+        if (time.endsWith("m")) return Long.parseLong(time.replace("m", "")) * 60 * multiplier;
+        return Long.parseLong(time) * multiplier;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        if (args.length == 2 && args[0].equalsIgnoreCase("block")) {
+            plugin.getConfig().getConfigurationSection("worlds").getKeys(false).forEach(completions::add);
+            StringUtil.copyPartialMatches(args[1], completions, completions);
+        }
+        return completions;
     }
 }
