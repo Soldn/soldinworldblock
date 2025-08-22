@@ -1,0 +1,8 @@
+name: SoldinWorldBlock
+version: 1.0
+main: com.soldinworldblock.Main
+api-version: 1.16
+commands:
+  soldinworldblock:
+    description: Основная команда плагина SoldinWorldBlock
+    usage: /soldinworldblock <block|unblock|status|reload>
