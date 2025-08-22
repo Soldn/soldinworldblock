@@ -18,7 +18,7 @@ public class WorldBlockManager {
     public void blockWorld(String world, String time) {
         long duration = parseTime(time);
         blockedWorlds.put(world, System.currentTimeMillis() + duration);
-        Bukkit.broadcastMessage(ChatColor.RED + "Мир " + world + " закрыт на " + time);
+        Bukkit.broadcastMessage(ChatColor.RED + "Мир " + world + " закрыт на " + time + "!");
         startCountdown(world, duration);
     }
 
@@ -38,12 +38,14 @@ public class WorldBlockManager {
     }
 
     public String getStatus() {
-        StringBuilder sb = new StringBuilder(ChatColor.YELLOW + "Статус миров:
-");
+        StringBuilder sb = new StringBuilder(ChatColor.YELLOW + "Статус миров:\n");
         for (Map.Entry<String, Long> entry : blockedWorlds.entrySet()) {
             long remaining = (entry.getValue() - System.currentTimeMillis()) / 1000;
-            sb.append(ChatColor.RED).append(entry.getKey()).append(" - ").append(remaining).append(" сек
-");
+            sb.append(ChatColor.RED)
+              .append(entry.getKey())
+              .append(" - ")
+              .append(remaining)
+              .append(" сек\n");
         }
         return sb.toString();
     }
@@ -59,10 +61,19 @@ public class WorldBlockManager {
     private void startCountdown(String world, long duration) {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (!isBlocked(world)) return;
+
             long remaining = (blockedWorlds.get(world) - System.currentTimeMillis()) / 1000;
-            if (remaining == 3600 || remaining == 1800 || remaining == 60 || remaining == 10 || remaining == 5 || remaining == 1) {
-                Bukkit.broadcastMessage(ChatColor.YELLOW + "Мир " + world + " будет открыт через " + remaining + " сек!");
+
+            if (remaining == 3600) {
+                Bukkit.broadcastMessage(ChatColor.YELLOW + "Мир " + world + " будет открыт через 1 час!");
+            } else if (remaining == 1800) {
+                Bukkit.broadcastMessage(ChatColor.YELLOW + "Мир " + world + " будет открыт через 30 минут!");
+            } else if (remaining == 60) {
+                Bukkit.broadcastMessage(ChatColor.YELLOW + "Мир " + world + " будет открыт через 1 минуту!");
+            } else if (remaining <= 0) {
+                unblockWorld(world);
+                Bukkit.broadcastMessage(ChatColor.GREEN + "Мир " + world + " открыт!");
             }
-        }, 20L, 1200L);
+        }, 20L, 20L * 60); // Проверка каждую минуту
     }
 }
