@@ -20,4 +20,4 @@ messages:
       10: "Мир {world} будет открыт через 10 секунд!"
     opened: "Мир {world} открыт!"
   unblock: "Мир {world} теперь открыт!"
-  blocked_portal: "Мир еще не открыт!"
+  blocked_access: "Мир еще не открыт!"
