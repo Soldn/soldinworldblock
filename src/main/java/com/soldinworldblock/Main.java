@@ -15,11 +15,9 @@ public class Main extends JavaPlugin {
 
         worldBlockManager = new WorldBlockManager(this);
 
-        // Команда
         getCommand("soldinworldblock").setExecutor(new SoldinWorldBlockCommand(this));
         getCommand("soldinworldblock").setTabCompleter(new SoldinWorldBlockCommand(this));
 
-        // Слушатели
         getServer().getPluginManager().registerEvents(new PortalAndTeleportListener(this), this);
     }
 
