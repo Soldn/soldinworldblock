@@ -1,14 +1,14 @@
-# Разработчик: Soldi_n .jar 
+# Разработчик: Soldi_n
 # Плагин: SoldinWorldBlock
-# Версия: 1.1
+# Версия: 1.0
 
 worlds:
   nether:
-    enabled: true
     display: "Ад"
-  end:
     enabled: true
+  end:
     display: "Эндер"
+    enabled: true
 
 messages:
   block:
